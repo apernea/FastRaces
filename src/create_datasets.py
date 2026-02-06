@@ -1,7 +1,9 @@
 import fastf1
+from fastf1.req import RateLimitExceededError
 import pandas as pd
 import numpy as np
 import time
+import config 
 
 fastf1.Cache.enable_cache('cache')  # Enable caching to speed up data retrieval
 
@@ -25,12 +27,6 @@ def get_race_history(year):
         try:
             race = fastf1.get_session(year, round_num, 'R')
             race.load(laps=False, telemetry=False, weather=False, messages=False)
-
-            print(f"Results type: {type(race.results)}")
-            print(f"Results empty: {race.results.empty if race.results is not None else 'None'}")
-            if race.results is not None and not race.results.empty:
-                print(f"Results columns: {race.results.columns.tolist()}")
-
             race_team_stats = {}
 
             for driver in race.results['Abbreviation']:
@@ -187,7 +183,7 @@ def process_season_data(current_year):
                     traceback.print_exc()
                     continue 
 
-        except Exception as e:
+        except RateLimitExceededError as e:
             print(f"Error processing {event_name}: {e}")
             import traceback
             traceback.print_exc()
@@ -195,17 +191,23 @@ def process_season_data(current_year):
 
     return pd.DataFrame(season_data)
 
-years_to_process = [2024]
+def fetch_all_data():
+    """
+    Main function to orchestrate the data fetching process.
+    """
+    all_data = []
+    for year in config.YEARS_TO_PROCESS:
+        df_year = process_season_data(year)
+        all_data.append(df_year)
 
-all_data = []
+    if all_data:
+        final_dataset = pd.concat(all_data, ignore_index=True)
+        final_dataset.to_csv(config.RAW_DATA_PATH, index=False)
+        print(f"\nComprehensive Dataset saved to {config.RAW_DATA_PATH}")
+        print(f"Total Rows: {len(final_dataset)}")
+    else:
+        print("No data was collected.")
 
-for year in years_to_process:
-    df_year = process_season_data(year)
-    all_data.append(df_year)
-
-final_dataset = pd.concat(all_data, ignore_index=True)
-
-# Save
-final_dataset.to_csv('2024_race_data_w_weather.csv', index=False)
-print("\nFull Dataset with Weather Created Successfully!")
-print(final_dataset.head())
+if __name__ == '__main__':
+    # This allows you to run this script directly if you only want to fetch data
+    fetch_all_data()
