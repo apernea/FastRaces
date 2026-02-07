@@ -8,10 +8,11 @@ DATA_FILE_NAME = "{year}_race_data_w_weather.csv"
 TARGET_VARIABLE = "Final_Pos"
 MODEL_PATH = 'models'
 RESULTS_PATH = 'results'
-FEATURE_IMPORTANCE_PLOT_PATH = 'feature_importance.png'
+FEATURE_IMPORTANCE_PLOT_PATH = 'feature_importance'
 
 os.makedirs(MODEL_PATH, exist_ok=True)
 os.makedirs(RESULTS_PATH, exist_ok=True)
+os.makedirs(FEATURE_IMPORTANCE_PLOT_PATH, exist_ok=True)
 
 # Training Configuration
 VALIDATION_SPLIT = 0.2  # 20% of historical data for validation

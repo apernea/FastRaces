@@ -12,7 +12,7 @@ def train_model(X_train, X_test, y_train, y_test):
     """
     Trains the XGBoost model, evaluates it, and saves artifacts.
     """
-    model = xgb.XGBRegressor(**config.XGB_PARAMS)
+    model = xgb.XGBClassifier(**config.XGB_PARAMS)
 
     model.fit(
         X_train, y_train,
@@ -30,23 +30,31 @@ def train_model(X_train, X_test, y_train, y_test):
     print(f"R^2 Score: {r2:.4f}")
     print("--------------------------------")
 
+    #Feature importance plot
+    save_feature_importance(model, X_train.columns)
+
     # --- Save Model ---
     model.save_model(config.MODEL_PATH)
     print(f"Model saved to {config.MODEL_PATH}")
 
-    # --- Feature Importance ---
-    feature_importances = pd.DataFrame({
-        'feature': X_train.columns,
-        'importance': model.feature_importances_
-    }).sort_values('importance', ascending=False).head(20)
+    return model
 
-    plt.figure(figsize=(10, 8))
-    plt.barh(feature_importances['feature'], feature_importances['importance'])
-    plt.title('Top 20 Feature Importances')
+def save_feature_importance(model, feature_names):
+    """
+    Saves the feature importance plot.
+    """
+    importance = model.feature_importances_
+    importance_df = pd.DataFrame({
+        'Feature': feature_names,
+        'Importance': importance
+    }).sort_values(by='Importance', ascending=False)
+
+    plt.figure(figsize=(10, 6))
+    plt.barh(importance_df['Feature'], importance_df['Importance'])
     plt.xlabel('Importance')
+    plt.title('Feature Importance')
     plt.gca().invert_yaxis()
     plt.tight_layout()
-    plt.savefig(config.FEATURE_IMPORTANCE_PLOT_PATH)
-    print(f"Feature importance plot saved to {config.FEATURE_IMPORTANCE_PLOT_PATH}")
-
-    return model
+    plt.savefig(config.FEATURE_IMPORTANCE_PLOT)
+    print(f"Feature importance plot saved to {config.FEATURE_IMPORTANCE_PLOT}")
+    plt.close()
