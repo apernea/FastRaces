@@ -1,13 +1,21 @@
 """Config file"""
+import os
 
-YEARS_TO_PROCESS = [2025]
-RAW_DATA_PATH = "datasets/2025_race_data_w_weather.csv"
+YEARS_TO_PROCESS = [2023,2024]
+DATA_PATH = "datasets"
+DATA_FILE_NAME = "{year}_race_data_w_weather.csv"
 
 TARGET_VARIABLE = "Final_Pos"
-TEST_SEASON = 2025
-MODEL_PATH = 'model/xgb_f1_model.json'
+MODEL_PATH = 'models'
+RESULTS_PATH = 'results'
 FEATURE_IMPORTANCE_PLOT_PATH = 'feature_importance.png'
 
+os.makedirs(MODEL_PATH, exist_ok=True)
+os.makedirs(RESULTS_PATH, exist_ok=True)
+
+# Training Configuration
+VALIDATION_SPLIT = 0.2  # 20% of historical data for validation
+MIN_RACES_FOR_TRAINING = 5  # Minimum number of races needed before making predictions
 
 XGB_PARAMS = {
     'n_estimators': 1000,
