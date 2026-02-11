@@ -778,3 +778,4 @@ src/config.py
 results/predictions_2024.csv
 models/xgb_model.json
 feature_importance.png
+models/xgb_model.ubj

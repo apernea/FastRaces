@@ -12,17 +12,19 @@ def train_model(X_train, X_test, y_train, y_test, test_metadata):
     """
     Trains the XGBoost model, evaluates it, and saves artifacts.
     """
-    model = xgb.XGBRegressor(**config.XGB_PARAMS)
+    model = xgb.XGBRegressor(
+        early_stopping_rounds=config.EARLY_STOPPING_ROUNDS,
+        learning_rate=config.XGB_PARAMS['learning_rate'],
+        n_estimators=config.XGB_PARAMS['n_estimators'],
+        max_depth=config.XGB_PARAMS['max_depth'],
+        subsample=config.XGB_PARAMS['subsample'],
+        colsample_bytree=config.XGB_PARAMS['colsample_bytree'],
+        objective=config.XGB_PARAMS['objective']
+    )
 
     model.fit(
         X_train, y_train,
         eval_set=[(X_test, y_test)],
-        n_estimators=config.XGB_PARAMS['n_estimators'],
-        max_depth=config.XGB_PARAMS['max_depth'],
-        learning_rate=config.XGB_PARAMS['learning_rate'],
-        subsample=config.XGB_PARAMS['subsample'],
-        colsample_bytree=config.XGB_PARAMS['colsample_bytree'],
-        early_stopping_rounds=config.EARLY_STOPPING_ROUNDS,
         verbose=False
     )
 
@@ -54,12 +56,10 @@ def train_model(X_train, X_test, y_train, y_test, test_metadata):
     save_feature_importance(model, X_train.columns)
 
     # --- Save Model ---
-    model.save_model("models/xgb_model.ubj")
+    model.save_model(f"{config.MODEL_PATH}/xgb_model.ubj")
     print(f"Model saved to {config.MODEL_PATH}")
 
-    results_df
-
-    return model
+    return model, results_df
 
 def save_feature_importance(model, feature_names):
     """
@@ -77,6 +77,7 @@ def save_feature_importance(model, feature_names):
     plt.title('Feature Importance')
     plt.gca().invert_yaxis()
     plt.tight_layout()
-    plt.savefig(config.FEATURE_IMPORTANCE_DIR)
-    print(f"Feature importance plot saved to {config.FEATURE_IMPORTANCE_DIR}")
+    save_path = f"{config.FEATURE_IMPORTANCE_DIR}/feature_importance.png"
+    plt.savefig(save_path)
+    print(f"Feature importance plot saved to {save_path}")
     plt.close()
