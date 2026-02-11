@@ -775,3 +775,6 @@ cache/2023/2023-11-26_Abu_Dhabi_Grand_Prix/2023-11-26_Race/weather_data.ff1pkl
 datasets/2024_race_data_w_weather.csv
 .gitignore
 src/config.py
+results/predictions_2024.csv
+models/xgb_model.json
+feature_importance.png
