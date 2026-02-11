@@ -27,7 +27,6 @@ XGB_PARAMS = {
     'subsample': 0.8,
     'colsample_bytree': 0.8,
     'objective': 'reg:squarederror',
-    'n_jobs': -1,
     'random_state': 42
 }
 EARLY_STOPPING_ROUNDS = 50
