@@ -2,17 +2,19 @@
 import os
 
 YEARS_TO_PROCESS = [2023,2024]
-DATA_PATH = "datasets"
+DATA_PATH = "datasets/"
 DATA_FILE_NAME = "{year}_race_data_w_weather.csv"
 
 TARGET_VARIABLE = "Final_Pos"
-MODEL_PATH = 'models'
-RESULTS_PATH = 'results'
-FEATURE_IMPORTANCE_PLOT_PATH = 'feature_importance'
+MODEL_PATH = 'models/'
+PREDICTIONS_PATH = 'results/'
+FEATURE_IMPORTANCE_DIR = 'feature_importance'
+
+TEST_SEASON = 2024
 
 os.makedirs(MODEL_PATH, exist_ok=True)
-os.makedirs(RESULTS_PATH, exist_ok=True)
-os.makedirs(FEATURE_IMPORTANCE_PLOT_PATH, exist_ok=True)
+os.makedirs(PREDICTIONS_PATH, exist_ok=True)
+os.makedirs(FEATURE_IMPORTANCE_DIR, exist_ok=True)
 
 # Training Configuration
 VALIDATION_SPLIT = 0.2  # 20% of historical data for validation
