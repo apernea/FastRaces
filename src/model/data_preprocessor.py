@@ -3,12 +3,22 @@ This module handles data loading, cleaning, feature engineering, and splitting f
 
 import pandas as pd
 import config
+import glob
 
 def preprocess_data():
     """
     Loads, cleans, and splits the data for modeling.
     """
-    df = pd.read_csv(config.RAW_DATA_PATH)
+    csv_files = glob.glob('datasets/*.csv')  # Adjust path if needed
+    df_list = []
+    
+    for file in csv_files:
+        temp_df = pd.read_csv(file)
+        df_list.append(temp_df)
+    
+    df = pd.concat(df_list, ignore_index=True)
+    print(f"Loaded {len(csv_files)} files with {len(df)} total rows")
+    print(f"Seasons in data: {sorted(df['Season'].unique())}")
 
     # --- Cleaning ---
     df[config.TARGET_VARIABLE] = pd.to_numeric(df[config.TARGET_VARIABLE], errors='coerce')
@@ -21,19 +31,22 @@ def preprocess_data():
     df_model = df_model.apply(pd.to_numeric, errors='coerce').fillna(0)
 
     X = df_model.drop(config.TARGET_VARIABLE, axis=1)
-    y = df_model[config.TARGET_VARIABLE]
+    y = df_model[config.TARGET_VARIABLE] - 1
 
     # --- Splitting ---
-    train_indices = df[df['Season'] != config.TEST_SEASON].index
-    test_indices = df[df['Season'] == config.TEST_SEASON].index
+    test_season = config.TEST_SEASON
+    train_indices = df[df['Season'] < test_season].index
+    test_indices = df[df['Season'] == test_season].index
 
     X_train, X_test = X.loc[train_indices], X.loc[test_indices]
     y_train, y_test = y.loc[train_indices], y.loc[test_indices]
     
+    test_metadata = df.loc[test_indices, ['Season', 'Round', 'Event', 'Driver']].reset_index(drop=True)
+
     # Drop Season column after splitting
     X_train = X_train.drop(columns=['Season'])
     X_test = X_test.drop(columns=['Season'])
     
     print(f"Data preprocessed. Training shape: {X_train.shape}, Testing shape: {X_test.shape}")
-    
-    return X_train, X_test, y_train, y_test
+
+    return X_train, X_test, y_train, y_test, test_metadata

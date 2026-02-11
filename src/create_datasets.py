@@ -1,9 +1,9 @@
 import fastf1
-from fastf1.req import RateLimitExceededError
 import pandas as pd
 import numpy as np
 import time
-import config 
+import traceback
+import config
 
 fastf1.Cache.enable_cache('cache')  # Enable caching to speed up data retrieval
 
@@ -17,8 +17,8 @@ def get_race_history(year):
         schedule = fastf1.get_event_schedule(year)
         
         races = schedule[schedule['EventFormat'] == 'conventional']   
-    except:
-        return None, None
+    except Exception:
+        return {}, {}
     
     for _, row in races.iterrows():
         round_num = row['RoundNumber']
@@ -29,15 +29,16 @@ def get_race_history(year):
             race.load(laps=False, telemetry=False, weather=False, messages=False)
             race_team_stats = {}
 
-            for driver in race.results['Abbreviation']:
+            results_by_driver = race.results.set_index('Abbreviation')
+            for driver in results_by_driver.index:
                 try:
-                    drv_res = race.results.loc[driver]
+                    drv_res = results_by_driver.loc[driver]
                     team_name = drv_res['TeamName']
                     position = drv_res['ClassifiedPosition']
 
                     try:
                         position = float(position)
-                    except:
+                    except (ValueError, TypeError):
                         continue
 
                     driver_history[(event_name, driver)] = position
@@ -45,7 +46,7 @@ def get_race_history(year):
                     if team_name not in race_team_stats:
                         race_team_stats[team_name] = []
                     race_team_stats[team_name].append(position)
-                except:
+                except Exception:
                     continue
             for team, positions in race_team_stats.items():
                 if(len(positions) > 0):
@@ -107,9 +108,10 @@ def process_season_data(current_year):
                         print(f"  {driver} not in qualifying")
                         continue
 
-                    # Get qualifying data
+                    # Get qualifying and race data
                     q_res = quali_by_driver.loc[driver]
-                    grid_pos = q_res['GridPosition']
+                    r_res = race_by_driver.loc[driver]
+                    grid_pos = r_res['GridPosition']
                     team_name = q_res['TeamName']
 
                     # Best quali lap time
@@ -133,9 +135,6 @@ def process_season_data(current_year):
                         prev_driver_pos = 20
                         is_rookie = 1
                     
-                    # Get race data
-                    r_res = race_by_driver.loc[driver]
-                    
                     # Pitstops
                     driver_laps = race.laps.pick_drivers(driver)
                     pitstops = driver_laps['PitInTime'].notna().sum() if not driver_laps.empty else 0
@@ -147,7 +146,7 @@ def process_season_data(current_year):
                     
                     try:
                         final_pos = float(final_pos)
-                    except:
+                    except (ValueError, TypeError):
                         continue  # Skip if position can't be converted
 
                     print(f"  Final position: {final_pos}")
@@ -179,13 +178,11 @@ def process_season_data(current_year):
 
                 except Exception as e:
                     print(f"Error with {driver}: {e}")
-                    import traceback
                     traceback.print_exc()
-                    continue 
+                    continue
 
-        except RateLimitExceededError as e:
+        except Exception as e:
             print(f"Error processing {event_name}: {e}")
-            import traceback
             traceback.print_exc()
             continue
 
@@ -194,19 +191,16 @@ def process_season_data(current_year):
 def fetch_all_data():
     """
     Main function to orchestrate the data fetching process.
+    Saves one CSV per year to the datasets directory.
     """
-    all_data = []
     for year in config.YEARS_TO_PROCESS:
         df_year = process_season_data(year)
-        all_data.append(df_year)
-
-    if all_data:
-        final_dataset = pd.concat(all_data, ignore_index=True)
-        final_dataset.to_csv(config.RAW_DATA_PATH, index=False)
-        print(f"\nComprehensive Dataset saved to {config.RAW_DATA_PATH}")
-        print(f"Total Rows: {len(final_dataset)}")
-    else:
-        print("No data was collected.")
+        if not df_year.empty:
+            output_file = f"{config.DATA_PATH}{config.DATA_FILE_NAME.format(year=year)}"
+            df_year.to_csv(output_file, index=False)
+            print(f"\nDataset for {year} saved to {output_file} ({len(df_year)} rows)")
+        else:
+            print(f"\nNo data collected for {year}.")
 
 if __name__ == '__main__':
     # This allows you to run this script directly if you only want to fetch data
