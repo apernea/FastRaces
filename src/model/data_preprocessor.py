@@ -38,15 +38,23 @@ def preprocess_data():
     train_indices = df[df['Season'] < test_season].index
     test_indices = df[df['Season'] == test_season].index
 
-    X_train, X_test = X.loc[train_indices], X.loc[test_indices]
-    y_train, y_test = y.loc[train_indices], y.loc[test_indices]
-    
+    X_train_full, X_test = X.loc[train_indices], X.loc[test_indices]
+    y_train_full, y_test = y.loc[train_indices], y.loc[test_indices]
+
     test_metadata = df.loc[test_indices, ['Season', 'Round', 'Event', 'Driver']].reset_index(drop=True)
+
+    # --- Validation Split (temporal: last 20% of training data) ---
+    val_size = int(len(X_train_full) * config.VALIDATION_SPLIT)
+    X_train = X_train_full.iloc[:-val_size]
+    X_val = X_train_full.iloc[-val_size:]
+    y_train = y_train_full.iloc[:-val_size]
+    y_val = y_train_full.iloc[-val_size:]
 
     # Drop Season column after splitting
     X_train = X_train.drop(columns=['Season'])
+    X_val = X_val.drop(columns=['Season'])
     X_test = X_test.drop(columns=['Season'])
-    
-    print(f"Data preprocessed. Training shape: {X_train.shape}, Testing shape: {X_test.shape}")
 
-    return X_train, X_test, y_train, y_test, test_metadata
+    print(f"Data preprocessed. Training shape: {X_train.shape}, Validation shape: {X_val.shape}, Testing shape: {X_test.shape}")
+
+    return X_train, X_val, X_test, y_train, y_val, y_test, test_metadata

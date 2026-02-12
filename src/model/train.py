@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import config
 
-def train_model(X_train, X_test, y_train, y_test, test_metadata):
+def train_model(X_train, X_val, X_test, y_train, y_val, y_test, test_metadata):
     """
     Trains the XGBoost model, evaluates it, and saves artifacts.
     """
@@ -43,18 +43,18 @@ def train_model(X_train, X_test, y_train, y_test, test_metadata):
     # Training the models
     model.fit(
         X_train, y_train,
-        eval_set=[(X_test, y_test)],
+        eval_set=[(X_val, y_val)],
         verbose=False
     )
 
     lower_quant.fit(
         X_train, y_train,
-        eval_set=[(X_test, y_test)],
+        eval_set=[(X_val, y_val)],
         verbose=False
     )
     upper_quant.fit(
         X_train, y_train,
-        eval_set=[(X_test, y_test)],
+        eval_set=[(X_val, y_val)],
         verbose=False
     )
 

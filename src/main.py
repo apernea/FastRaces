@@ -30,13 +30,13 @@ def main():
 
     print("\n--- Starting Step 2: Data Preprocessing ---")
     try:
-        X_train, X_test, y_train, y_test, test_metadata = preprocess_data()
+        X_train, X_val, X_test, y_train, y_val, y_test, test_metadata = preprocess_data()
     except FileNotFoundError:
         print("Raw data file not found. Please run create_datasets.py first.")
         return
 
     print("\n--- Starting Step 3: Model Training ---")
-    train_model(X_train, X_test, y_train, y_test, test_metadata)
+    train_model(X_train, X_val, X_test, y_train, y_val, y_test, test_metadata)
     
     print("\n--- Pipeline Finished Successfully! ---")
     print("Check the 'models' directory for the saved model and 'feature_importance' for the feature importance plot.")

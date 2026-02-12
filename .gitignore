@@ -2,6 +2,9 @@
 .datasets/
 cache/
 datasets/
+results/
+feature_importance/
+models/
 
 cache/fastf1_http_cache.sqlite
 cache/2023/2023-03-05_Bahrain_Grand_Prix/2023-03-05_Race/driver_info.ff1pkl
