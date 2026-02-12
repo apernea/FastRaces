@@ -135,10 +135,6 @@ def process_season_data(current_year):
                         prev_driver_pos = 20
                         is_rookie = 1
                     
-                    # Pitstops
-                    driver_laps = race.laps.pick_drivers(driver)
-                    pitstops = driver_laps['PitInTime'].notna().sum() if not driver_laps.empty else 0
-                    
                     # Race results
                     status = r_res['Status']
                     points = r_res['Points']
@@ -168,7 +164,6 @@ def process_season_data(current_year):
                         'Race_Rainfall': int(rainfall),
                         'Race_WindSpeed': wind_speed,
                         'Race_WindDirection': wind_direction,
-                        'Pitstops': pitstops,
                         'Status': status,
                         'Points': points,  
                         'Final_Pos': final_pos
