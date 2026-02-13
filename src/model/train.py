@@ -21,7 +21,10 @@ def train_model(X_train, X_val, X_test, y_train, y_val, y_test, test_metadata):
         max_depth=config.XGB_PARAMS['max_depth'],
         subsample=config.XGB_PARAMS['subsample'],
         colsample_bytree=config.XGB_PARAMS['colsample_bytree'],
-        objective=config.XGB_PARAMS['objective']
+        objective=config.XGB_PARAMS['objective'],
+        reg_alpha=config.XGB_PARAMS['reg_alpha'],
+        reg_lambda=config.XGB_PARAMS['reg_lambda'],
+        min_child_weight=config.XGB_PARAMS['min_child_weight']
     )
     lower_quant = xgb.XGBRegressor(
         learning_rate=config.XGB_PARAMS['learning_rate'],

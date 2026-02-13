@@ -1,7 +1,7 @@
 """Config file"""
 import os
 
-YEARS_TO_PROCESS = [2019, 2020, 2021, 2022, 2023, 2024, 2025]
+YEARS_TO_PROCESS = [2019,2020,2021,2022,2023,2024]
 DATA_PATH = "datasets/"
 DATA_FILE_NAME = "{year}_race_data_w_weather.csv"
 
@@ -27,7 +27,10 @@ XGB_PARAMS = {
     'subsample': 0.8,
     'colsample_bytree': 0.8,
     'objective': 'reg:squarederror',
-    'random_state': 42
+    'random_state': 42,
+    'reg_alpha': 0.1,       # L1 regularization (encourages sparsity in feature weights)
+    'reg_lambda': 1.5,      # L2 regularization (penalizes large weights)
+    'min_child_weight': 3,  # Minimum sum of instance weight needed in a leaf
 }
 EARLY_STOPPING_ROUNDS = 50
 

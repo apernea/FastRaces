@@ -2,6 +2,7 @@
 This module handles data loading, cleaning, feature engineering, and splitting for the XGB model"""
 
 import pandas as pd
+import os
 import config
 import glob
 
@@ -9,7 +10,7 @@ def preprocess_data():
     """
     Loads, cleans, and splits the data for modeling.
     """
-    csv_files = glob.glob('datasets/*.csv')  # Adjust path if needed
+    csv_files = glob.glob(os.path.join(os.path.dirname(__file__), '..', '..', 'datasets', '*.csv'))
     df_list = []
     
     for file in csv_files:
